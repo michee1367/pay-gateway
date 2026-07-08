@@ -12,6 +12,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 
@@ -33,12 +34,25 @@ public class PayDrcClient {
         this.restClient = RestClient.builder()
                 .baseUrl(apiUrl)
                 .requestFactory(factory)
+                .requestInterceptor(new RestClientLoggingInterceptor())
                 .build();
     }
 
     @Retry(name = "payDrcApi")
     public PayDrcResponse sendToProvider(PayDrcRequest request) {
         log.info("Envoi de la requête à PayDRC - Ref: {}, Méthode: {}", request.reference(), request.method());
+        log.info("Parametre - Ref: {}, Méthode: {}", request.merchantId(), request.method());// Ajoute ces deux lignes juste au début de ta méthode sendToProvider(PayDrcRequest request) :
+        try {
+            String jsonBrut = new ObjectMapper().writeValueAsString(request);
+            System.out.println("====== JSON BRUT SANS TRADUCTION ======\n" + jsonBrut + "\n=======================================");
+            
+            //return new PayDrcResponse(true, "OK", null, jsonBrut );
+            
+        } catch (Exception e) {
+            // Sécurité en cas de mauvaise réponse inattendue non capturée par onStatus
+            //log.error("Erreur HTTP inattendue : Code {}, Corps : {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return new PayDrcResponse(false, "ERROR", null, "Erreur de communication : " + e.getMessage());
+        }
 
         try {
             return restClient.post()
