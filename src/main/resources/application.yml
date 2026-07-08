@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: paydrc-gateway
+  profiles:
+    active: dev
+server:
+  port: 8082 # Port distinct pour ce microservice
+
+paydrc:
+  api-url: https://paydrc.gofreshbakery.net/api/v5/
+  merchant-id: "j%<8xdoZcXoNtWf]b"
+  merchant-secret: "###############" # Mets ta vraie clé ici
+  callback-url: "https://baadhi.com/payment/freshpay/callback"
+
+resilience4j:
+  retry:
+    instances:
+      payDrcApi:
+        maxAttempts: 3
+        waitDuration: 2s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
