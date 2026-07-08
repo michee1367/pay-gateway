@@ -9,7 +9,7 @@ server:
 paydrc:
   api-url: https://paydrc.gofreshbakery.net/api/v5/
   merchant-id: "j%<8xdoZcXoNtWf]b"
-  merchant-secret: "###############" # Mets ta vraie clé ici
+  merchant-secret: ${GATEWAY_SECRET|my_gateway_secret} # Mets ta vraie clé ici
   callback-url: "https://baadhi.com/payment/freshpay/callback"
 
 resilience4j:
