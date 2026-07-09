@@ -51,7 +51,12 @@ public class PayDrcClient {
         } catch (Exception e) {
             // Sécurité en cas de mauvaise réponse inattendue non capturée par onStatus
             //log.error("Erreur HTTP inattendue : Code {}, Corps : {}", e.getStatusCode(), e.getResponseBodyAsString());
-            return new PayDrcResponse(false, "ERROR", null, "Erreur de communication : " + e.getMessage());
+            return new PayDrcResponse(
+                    "Failed", 
+                    0.0, 
+                    "Erreur HTTP : " + e.getMessage(), 
+                    null, null, null, null, null, null
+            );
         }
 
         try {
@@ -78,18 +83,29 @@ public class PayDrcClient {
         } catch (RestClientResponseException ex) {
             // Sécurité en cas de mauvaise réponse inattendue non capturée par onStatus
             log.error("Erreur HTTP inattendue : Code {}, Corps : {}", ex.getStatusCode(), ex.getResponseBodyAsString());
-            return new PayDrcResponse(false, "ERROR", null, "Erreur de communication : " + ex.getMessage());
+            return new PayDrcResponse(
+                    "Failed", 
+                    0.0, 
+                    "Erreur HTTP : " + ex.getStatusText(), 
+                    null, null, null, null, null, null
+            );
             
         } catch (IllegalArgumentException ex) {
-            // On attrape l'erreur 4xx pour retourner un objet JSON propre à ton app principale
-            return new PayDrcResponse(false, "BAD_REQUEST", null, ex.getMessage());
+            // On attrape l'erreur 4xx (Erreurs d'identifiants, données manquantes, etc.)
+            return new PayDrcResponse(
+                    "Failed", 
+                    0.0, 
+                    ex.getMessage(), 
+                    null, null, null, null, null, null
+            );
             
         } catch (Exception ex) {
-            // Gère les Timeouts ou pertes brutales de connexion réseau
+            // Gère les Timeouts ou coupures de connexion réseau brutales
             log.error("Impossible de joindre le serveur PayDRC (Timeout ou Réseau) : {}", ex.getMessage());
-            // Lever une RuntimeException ici permet à Resilience4j de savoir qu'il faut déclencher un Retry.
-            throw new RuntimeException("Passerelle injoignable, tentative de réessai...", ex);
+            // Lever une RuntimeException ici permet à @Retry (Resilience4j) de relancer la transaction
+            throw new RuntimeException("Passerelle PayDRC temporairement injoignable, nouvelle tentative...", ex);
         }
+
     }
 
     public PayDrcRequest buildPayload(String phone, String amount, String currency, String action, String ref, String method) {
