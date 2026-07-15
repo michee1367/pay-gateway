@@ -48,13 +48,13 @@ public class PayDrcClient {
             String jsonBrut = new ObjectMapper().writeValueAsString(request);
             System.out.println("====== JSON BRUT SANS TRADUCTION ======\n" + jsonBrut + "\n=======================================");
             
-            return new PayDrcResponse(
+            /*return new PayDrcResponse(
                     "SUCCESS", 
                     0.0, 
                     "Test Ok", 
                     null, null, request.reference(), null, null, null
 
-            );
+            );*/
             
         } catch (Exception e) {
             // Sécurité en cas de mauvaise réponse inattendue non capturée par onStatus
@@ -66,7 +66,6 @@ public class PayDrcClient {
                     null, null, null, null, null, null
             );
         }
-        /* 
 
         try {
             return restClient.post()
@@ -113,7 +112,7 @@ public class PayDrcClient {
             log.error("Impossible de joindre le serveur PayDRC (Timeout ou Réseau) : {}", ex.getMessage());
             // Lever une RuntimeException ici permet à @Retry (Resilience4j) de relancer la transaction
             throw new RuntimeException("Passerelle PayDRC temporairement injoignable, nouvelle tentative...", ex);
-        }*/
+        }
 
     }
 
