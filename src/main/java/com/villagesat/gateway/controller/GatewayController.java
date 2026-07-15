@@ -27,7 +27,8 @@ public class GatewayController {
                 request.currency(),
                 request.action().toLowerCase(), // "debit" ou "credit"
                 request.reference(),
-                request.provider() // "mpesa", "orange", etc.
+                request.provider(), // "mpesa", "orange", etc.
+                request.callbackUrl()
         );
 
         // Appel de la passerelle externe

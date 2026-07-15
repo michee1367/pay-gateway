@@ -24,7 +24,7 @@ public class PayDrcClient {
 
     @Value("${paydrc.merchant-id}") private String merchantId;
     @Value("${paydrc.merchant-secret}") private String merchantSecret;
-    @Value("${paydrc.callback-url}") private String callbackUrl;
+    //@Value("${paydrc.callback-url}") private String callbackUrl;
 
     public PayDrcClient(@Value("${paydrc.api-url}") String apiUrl) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -42,11 +42,19 @@ public class PayDrcClient {
     public PayDrcResponse sendToProvider(PayDrcRequest request) {
         log.info("Envoi de la requête à PayDRC - Ref: {}, Méthode: {}", request.reference(), request.method());
         log.info("Parametre - Ref: {}, Méthode: {}", request.merchantId(), request.method());// Ajoute ces deux lignes juste au début de ta méthode sendToProvider(PayDrcRequest request) :
+        log.info("Callback URL: {}", request.callbackUrl());// Ajoute ces deux lignes juste au début de ta méthode sendToProvider(PayDrcRequest request) :
+        
         try {
             String jsonBrut = new ObjectMapper().writeValueAsString(request);
             System.out.println("====== JSON BRUT SANS TRADUCTION ======\n" + jsonBrut + "\n=======================================");
             
-            //return new PayDrcResponse(true, "OK", null, jsonBrut );
+            return new PayDrcResponse(
+                    "SUCCESS", 
+                    0.0, 
+                    "Test Ok", 
+                    null, null, request.reference(), null, null, null
+
+            );
             
         } catch (Exception e) {
             // Sécurité en cas de mauvaise réponse inattendue non capturée par onStatus
@@ -58,6 +66,7 @@ public class PayDrcClient {
                     null, null, null, null, null, null
             );
         }
+        /* 
 
         try {
             return restClient.post()
@@ -104,11 +113,11 @@ public class PayDrcClient {
             log.error("Impossible de joindre le serveur PayDRC (Timeout ou Réseau) : {}", ex.getMessage());
             // Lever une RuntimeException ici permet à @Retry (Resilience4j) de relancer la transaction
             throw new RuntimeException("Passerelle PayDRC temporairement injoignable, nouvelle tentative...", ex);
-        }
+        }*/
 
     }
 
-    public PayDrcRequest buildPayload(String phone, String amount, String currency, String action, String ref, String method) {
+    public PayDrcRequest buildPayload(String phone, String amount, String currency, String action, String ref, String method, String callbackUrl) {
         return new PayDrcRequest(
                 merchantId, merchantSecret, amount, currency, action, phone,
                 "agromwinda", "agromwinda", "agromwinda@gmail.com",
